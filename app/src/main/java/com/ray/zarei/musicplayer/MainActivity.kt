@@ -5,15 +5,12 @@ import android.annotation.SuppressLint
 import android.content.*
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.MenuItem
 import android.widget.MediaController.MediaPlayerControl
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.ray.zarei.musicplayer.adapters.SongsRecyclerViewAdapter
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), MediaPlayerControl {
@@ -22,6 +19,8 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
     lateinit var songs: ArrayList<Song>
 
     lateinit var controller: MusicController
+
+    var songPosition = 0;
 
     var musicService: MusicService? = null
 
@@ -34,6 +33,12 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         controller.setMediaPlayer(this);
         controller.setAnchorView(findViewById(R.id.rc));
         controller.isEnabled = true;
+
+        controller.setPrevNextListeners({ v -> // next
+            playNext()
+        }, { v -> // prev
+            playPrev()
+        })
 
     }
 
@@ -57,10 +62,11 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         getSongs()
         setupRecyclerView()
 
+        setController()
     }
 
 
-    private val musicConnection = object: ServiceConnection {
+    private val musicConnection = object : ServiceConnection {
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as MusicService.MusicBinder
@@ -76,24 +82,14 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
     }
 
 
-    fun setupController() {
-
-        setController()
-
-        controller.setPrevNextListeners({ v -> // next
-            playNext()
-        }, { v -> // prev
-            playPrev()
-        })
-
-    }
-
     fun playNext() {
-
+        musicService?.playNext()
+        controller.show(0)
     }
 
     fun playPrev() {
-
+        musicService?.playPrev()
+        controller.show(0)
     }
 
     fun setupRecyclerView() {
@@ -154,7 +150,7 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
-        when(item.itemId) {
+        when (item.itemId) {
 
 
         }
@@ -162,47 +158,76 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun start() {
 
+    override fun start() {
+        musicService?.go()
     }
 
     override fun pause() {
-        TODO("Not yet implemented")
+        musicService?.pausePlayer()
     }
 
     override fun getDuration(): Int {
-        TODO("Not yet implemented")
+
+
+        musicService?.let {
+
+            if (musicBound && it.isPng()) {
+                return it.getDur()
+            }
+        }
+
+        return 0
     }
 
     override fun getCurrentPosition(): Int {
-        TODO("Not yet implemented")
+
+        musicService?.let {
+
+            if (musicBound && it.isPng()) {
+                return it.getPosn()
+            }
+
+        }
+
+        return 0
+
     }
 
-    override fun seekTo(p0: Int) {
-        TODO("Not yet implemented")
+    override fun seekTo(position: Int) {
+        musicService?.seek(position)
     }
 
     override fun isPlaying(): Boolean {
-        TODO("Not yet implemented")
+
+        musicService?.let {
+
+            if (musicBound) {
+                return it.isPng()
+            }
+
+        }
+
+        return false
     }
 
     override fun getBufferPercentage(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 
     override fun canPause(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun canSeekBackward(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun canSeekForward(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun getAudioSessionId(): Int {
-        TODO("Not yet implemented")
+        return 0
     }
 }
