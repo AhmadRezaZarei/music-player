@@ -1,22 +1,33 @@
 package com.ray.zarei.musicplayer
 
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.*
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.MenuItem
 import android.widget.MediaController.MediaPlayerControl
+import android.widget.RemoteViews
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ray.zarei.musicplayer.adapters.SongsRecyclerViewAdapter
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
 
-    lateinit var songs: ArrayList<Song>
+     var songs: ArrayList<Song> = ArrayList()
 
     lateinit var controller: MusicController
 
@@ -63,6 +74,63 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         setupRecyclerView()
 
         setController()
+
+
+
+
+    }
+
+    val CHANNEL_ID = "channel_id"
+
+
+    @SuppressLint("RemoteViewLayout")
+    private fun getNotification(): Notification {
+// Get the layouts to use in the custom notification
+        val notificationLayout = RemoteViews(packageName, R.layout.layout_notification)
+        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.layout_notification)
+// Apply the layouts to the notification
+        var customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(notificationLayout)
+            .setCustomBigContentView(notificationLayoutExpanded)
+            .build()
+
+        customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setContentTitle("My notification")
+            .setContentText("Hello World!")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            // Set the intent that will fire when the user taps the notification
+            .setAutoCancel(true).build()
+
+         customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(notificationLayout)
+            .setCustomBigContentView(notificationLayoutExpanded)
+            .build()
+
+
+        return customNotification
+    }
+
+    fun createNotificationChannel() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            val name = "channel_name"
+            val descriptionText = "description text"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                this.description = descriptionText
+            }
+
+            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+
+        }
+
     }
 
 
@@ -80,6 +148,8 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         }
 
     }
+
+
 
 
     fun playNext() {
@@ -141,7 +211,6 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
     }
 
-
     override fun onDestroy() {
         stopService(playIntent)
         musicService = null
@@ -157,7 +226,6 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
         return super.onOptionsItemSelected(item)
     }
-
 
     override fun start() {
         musicService?.go()

@@ -1,11 +1,13 @@
 package com.ray.zarei.musicplayer
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -14,7 +16,9 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
+import android.widget.RemoteViews
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -131,50 +135,32 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onPrepared(mp: MediaPlayer?) {
         mp?.start()
 
-
-        val notIntent = Intent(this, MainActivity::class.java)
-        notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val pendInt = PendingIntent.getActivity(this, 0, notIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-
-
         createNotificationChannel()
 
-        val songTitle = songs[songPosition.toInt()].title
+        startForeground(12, getNotification())
+        Log.e("MusicService", "started forground" )
 
-        var builder = NotificationCompat.Builder(this, CHANNEL_ID)
+    }
+
+    @SuppressLint("RemoteViewLayout")
+    private fun getNotification(): Notification {
+
+// Get the layouts to use in the custom notification
+        val notificationLayout = RemoteViews(packageName, R.layout.layout_notification)
+        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.layout_notification)
+
+// Apply the layouts to the notification
+        val customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle("Content title")
-            .setContentText("Content text blah blah" + songTitle)
-            .setContentIntent(pendInt)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-
-
-        val not = builder.build()
-
-
-        with(NotificationManagerCompat.from(this)) {
-            if (ActivityCompat.checkSelfPermission(
-                    this@MusicService,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-              //  Toast.makeText(this@MusicService, " Needs permission", Toast.LENGTH_LONG).show()
-
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
-            }
-            notify(123, builder.build())
-        }
-
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(notificationLayout)
+            .setCustomBigContentView(notificationLayoutExpanded)
+            .build()
+        return customNotification
     }
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {

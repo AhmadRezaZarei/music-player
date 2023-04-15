@@ -22,11 +22,8 @@ class NotificationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification)
-
-
-
+    
         createNotificationChannel()
-
 
         // Create an explicit intent for an Activity in your app
         val intent = Intent(this, GrantAccessActivity::class.java).apply {
