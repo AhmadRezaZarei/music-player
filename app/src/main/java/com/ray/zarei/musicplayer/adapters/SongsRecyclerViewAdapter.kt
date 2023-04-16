@@ -26,8 +26,6 @@ class SongsRecyclerViewAdapter(private val songs: ArrayList<Song>, private val o
             holder.tvArtist.text = it.artistName
         }
 
-
-
         val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
 
         val coverUri = ContentUris.withAppendedId(sArtworkUri, songs[position].albumId)
