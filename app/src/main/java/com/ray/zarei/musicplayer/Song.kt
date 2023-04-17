@@ -1,6 +1,7 @@
 package com.ray.zarei.musicplayer
 
-import android.os.Parcelable
+import android.content.ContentUris
+import android.net.Uri
 
 open class Song(
     open val id: Long,
@@ -19,6 +20,10 @@ open class Song(
 ) {
 
 
+    fun getCoverUri(): Uri {
+        val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
+        return ContentUris.withAppendedId(sArtworkUri, albumId)
+    }
     // need to override manually because is open and cannot be a data class
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

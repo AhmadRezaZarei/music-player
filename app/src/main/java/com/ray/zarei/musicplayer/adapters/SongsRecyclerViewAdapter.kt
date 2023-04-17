@@ -1,8 +1,6 @@
 package com.ray.zarei.musicplayer.adapters
 
 
-import android.content.ContentUris
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,12 +24,9 @@ class SongsRecyclerViewAdapter(private val songs: ArrayList<Song>, private val o
             holder.tvArtist.text = it.artistName
         }
 
-        val sArtworkUri = Uri.parse("content://media/external/audio/albumart")
-
-        val coverUri = ContentUris.withAppendedId(sArtworkUri, songs[position].albumId)
 
         Glide.with(holder.itemView.context)
-            .load(coverUri)
+            .load(songs[position].getCoverUri())
             .placeholder(R.drawable.default_album_art)
             .error(R.drawable.default_album_art)
             .centerCrop()

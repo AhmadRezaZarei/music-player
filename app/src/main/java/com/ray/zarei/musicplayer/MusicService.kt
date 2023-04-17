@@ -19,9 +19,12 @@ import android.util.Log
 import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.graphics.drawable.toBitmap
+import com.ray.zarei.musicplayer.extensions.getTintedDrawable
 
 
 class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
@@ -34,7 +37,7 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
 
     lateinit var songs: ArrayList<Song>
 
-    var songPosition: Long = 0
+    var songPosition: Int = 0
 
     fun setList(songs: ArrayList<Song>) {
         this.songs = songs
@@ -42,7 +45,7 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
 
 
     fun setSong(songPosition: Int) {
-        this.songPosition = songPosition.toLong()
+        this.songPosition = songPosition
     }
 
     inner class MusicBinder: Binder() {
@@ -89,7 +92,7 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
     fun playPrev() {
         songPosition--
         if (songPosition < 0) {
-            songPosition = (songs.size - 1).toLong()
+            songPosition = (songs.size - 1)
         }
         playSong()
     }
@@ -97,7 +100,7 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
     fun playNext() {
         songPosition++
 
-        if (songPosition == (songs.size - 1).toLong()) {
+        if (songPosition == (songs.size - 1)) {
             songPosition = 0
         }
 
@@ -141,24 +144,54 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
 
         createNotificationChannel()
 
-        startForeground(12, getNotification())
+        startForeground(12, getNotification(songs[songPosition]))
         Log.e("MusicService", "started forground" )
 
     }
 
     @SuppressLint("RemoteViewLayout")
-    private fun getNotification(): Notification {
+    private fun getNotification(song: Song): Notification {
 
 // Get the layouts to use in the custom notification
         val notificationLayout = RemoteViews(packageName, R.layout.layout_notification)
-        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.layout_notification)
+//        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.layout_notification)
+
+        notificationLayout.apply {
+            setTextViewText(R.id.tv_title, song.title)
+            setTextViewText(R.id.tv_subtitle, song.artistName)
+            setImageViewResource(R.id.iv_song_cover, R.drawable.ic_launcher_background)
+            setTextViewText(R.id.tv_app_name, "Music Player")
+
+
+            val tintColor = applicationContext.resources.getColor(R.color.black)
+
+             val smallIcon = applicationContext.getTintedDrawable(R.drawable.ic_notification, tintColor).toBitmap()
+             setImageViewBitmap(R.id.iv_small_icon, smallIcon)
+
+            val prev = applicationContext.getTintedDrawable(R.drawable.ic_skip_previous, tintColor).toBitmap()
+            setImageViewBitmap(R.id.iv_action_prev, prev)
+
+            val pause = applicationContext.getTintedDrawable(R.drawable.ic_pause_white_48dp, tintColor).toBitmap()
+            setImageViewBitmap(R.id.iv_action_play_pause, pause)
+
+            val next = applicationContext.getTintedDrawable(R.drawable.ic_skip_next, tintColor).toBitmap()
+            setImageViewBitmap(R.id.iv_action_next,next)
+
+            val close = applicationContext.getTintedDrawable(R.drawable.ic_close, tintColor).toBitmap()
+            setImageViewBitmap(R.id.iv_action_quit, close)
+
+            setImageViewUri(R.id.iv_song_cover, songs[songPosition].getCoverUri())
+
+        }
+
 
 // Apply the layouts to the notification
         val customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_background)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setSmallIcon(R.drawable.ic_notification)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            . setCustomBigContentView(notificationLayout)
+            .setOngoing(true)
             .setCustomContentView(notificationLayout)
-            .setCustomBigContentView(notificationLayoutExpanded)
             .build()
         return customNotification
     }
