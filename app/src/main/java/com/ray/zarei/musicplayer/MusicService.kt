@@ -3,31 +3,26 @@ package com.ray.zarei.musicplayer
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
+import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.browse.MediaBrowser
 import android.net.Uri
-import android.os.Binder
-import android.os.Build
-import android.os.IBinder
-import android.os.PowerManager
+import android.os.*
+import android.service.media.MediaBrowserService
 import android.util.Log
 import android.widget.RemoteViews
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.graphics.Color
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.ray.zarei.musicplayer.extensions.getTintedDrawable
+import com.ray.zarei.musicplayer.utils.VersionUtils
 
 
-class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
 
     private val NOTIFY_ID = 1
 
@@ -58,7 +53,7 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
         initMusicPlayer()
     }
 
-    fun initMusicPlayer() {
+    private fun initMusicPlayer() {
         player.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
         player.setAudioStreamType(AudioManager.STREAM_MUSIC)
         player.setOnPreparedListener(this)
@@ -118,6 +113,14 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
         return false
     }
 
+    override fun onGetRoot(clientPackageName: String, clientId: Int, rootHints: Bundle?): BrowserRoot? {
+        return null
+    }
+
+    override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowser.MediaItem>>) {
+
+    }
+
     val CHANNEL_ID = "channel_id"
 
     fun createNotificationChannel() {
@@ -149,6 +152,21 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
 
     }
 
+
+    private fun buildPendingIntent(
+        context: Context,
+        action: String,
+        serviceName: ComponentName?,
+    ): PendingIntent {
+        val intent = Intent(action)
+        intent.component = serviceName
+        return PendingIntent.getService(
+            context, 0, intent, if (VersionUtils.hasMarshmallow())
+                PendingIntent.FLAG_IMMUTABLE
+            else 0
+        )
+    }
+
     @SuppressLint("RemoteViewLayout")
     private fun getNotification(song: Song): Notification {
 
@@ -161,7 +179,6 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
             setTextViewText(R.id.tv_subtitle, song.artistName)
             setImageViewResource(R.id.iv_song_cover, R.drawable.ic_launcher_background)
             setTextViewText(R.id.tv_app_name, "Music Player")
-
 
             val tintColor = applicationContext.resources.getColor(R.color.black)
 
@@ -182,7 +199,16 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
 
             setImageViewUri(R.id.iv_song_cover, songs[songPosition].getCoverUri())
 
+
+            val serviceName = ComponentName(applicationContext, MusicService::class.java)
+
+            val pendingIntent = buildPendingIntent(applicationContext, ACTION_PAUSE, serviceName)
+
+            setOnClickPendingIntent(R.id.iv_action_play_pause, pendingIntent)
+
         }
+
+
 
 
 // Apply the layouts to the notification
@@ -195,6 +221,30 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
             .build()
         return customNotification
     }
+
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+
+        intent?.let {
+
+            when (it.action) {
+
+                ACTION_PAUSE -> {
+                    Log.e("MusicService", "onStartCommand: action pause")
+                }
+                else -> {
+
+                }
+            }
+
+        }
+
+
+
+        return super.onStartCommand(intent, flags, startId)
+    }
+
 
     override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
         return false
@@ -231,6 +281,12 @@ class MusicService : Service(), MediaPlayer.OnPreparedListener, MediaPlayer.OnEr
     override fun onDestroy() {
         super.onDestroy()
         stopForeground(true)
+    }
+
+    companion object {
+
+        val ACTION_PAUSE = "action_pause"
+
     }
 
 

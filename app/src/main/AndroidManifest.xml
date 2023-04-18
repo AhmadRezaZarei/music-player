@@ -26,7 +26,12 @@
 
         </activity>
 
-        <service android:name=".MusicService" />
+        <service android:name=".MusicService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name=".GrantAccessActivity"
