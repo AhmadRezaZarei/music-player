@@ -63,14 +63,14 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
 
 
     fun playSong() {
+
         player.reset()
 
-        val song = songs[songPosition.toInt()]
+        val song = songs[songPosition]
 
         val currentSongId = song.id
 
         val trackUri: Uri = ContentUris.withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, currentSongId)
-
 
         try {
             player.setDataSource(applicationContext, trackUri)
@@ -80,24 +80,36 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
         }
 
 
-
-
     }
 
     fun playPrev() {
+
         songPosition--
         if (songPosition < 0) {
             songPosition = (songs.size - 1)
         }
+
         playSong()
     }
 
+    fun pauseOrPauseSong() {
+
+        if (player.isPlaying) {
+            player.pause()
+        } else {
+            player.start()
+        }
+    }
+
     fun playNext() {
-        songPosition++
+
 
         if (songPosition == (songs.size - 1)) {
             songPosition = 0
+        } else {
+            songPosition++
         }
+
 
         playSong()
 
@@ -186,25 +198,33 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
              setImageViewBitmap(R.id.iv_small_icon, smallIcon)
 
             val prev = applicationContext.getTintedDrawable(R.drawable.ic_skip_previous, tintColor).toBitmap()
-            setImageViewBitmap(R.id.iv_action_prev, prev)
+            setImageViewBitmap(R.id.ib_action_prev, prev)
 
             val pause = applicationContext.getTintedDrawable(R.drawable.ic_pause_white_48dp, tintColor).toBitmap()
-            setImageViewBitmap(R.id.iv_action_play_pause, pause)
+            setImageViewBitmap(R.id.ib_action_play_pause, pause)
 
             val next = applicationContext.getTintedDrawable(R.drawable.ic_skip_next, tintColor).toBitmap()
-            setImageViewBitmap(R.id.iv_action_next,next)
+            setImageViewBitmap(R.id.ib_action_next,next)
 
             val close = applicationContext.getTintedDrawable(R.drawable.ic_close, tintColor).toBitmap()
-            setImageViewBitmap(R.id.iv_action_quit, close)
+            setImageViewBitmap(R.id.ib_action_quit, close)
 
             setImageViewUri(R.id.iv_song_cover, songs[songPosition].getCoverUri())
 
 
             val serviceName = ComponentName(applicationContext, MusicService::class.java)
 
-            val pendingIntent = buildPendingIntent(applicationContext, ACTION_PAUSE, serviceName)
+            val pausedPendingIntent = buildPendingIntent(applicationContext, ACTION_PAUSE, serviceName)
+            setOnClickPendingIntent(R.id.ib_action_play_pause, pausedPendingIntent)
 
-            setOnClickPendingIntent(R.id.iv_action_play_pause, pendingIntent)
+            val nextPendingIndent = buildPendingIntent(applicationContext, ACTION_NEXT, serviceName)
+            setOnClickPendingIntent(R.id.ib_action_next, nextPendingIndent)
+
+            val previousPendingIndent = buildPendingIntent(applicationContext, ACTION_PREVIOUSE, serviceName)
+            setOnClickPendingIntent(R.id.ib_action_prev, previousPendingIndent)
+
+            val closePendingIndex = buildPendingIntent(applicationContext, ACTION_CLOSE, serviceName)
+            setOnClickPendingIntent(R.id.ib_action_quit, closePendingIndex)
 
         }
 
@@ -225,14 +245,34 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-
         intent?.let {
 
             when (it.action) {
 
                 ACTION_PAUSE -> {
-                    Log.e("MusicService", "onStartCommand: action pause")
+
+                    pauseOrPauseSong()
+
                 }
+
+                ACTION_NEXT -> {
+
+                    Log.e("MusicService", "onStartCommand: action next called" )
+                    playNext()
+
+                }
+
+                ACTION_PREVIOUSE -> {
+
+                    playPrev()
+
+                }
+
+                ACTION_CLOSE -> {
+                    player.release()
+                    stopForeground(true)
+                }
+
                 else -> {
 
                 }
@@ -284,9 +324,10 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
     }
 
     companion object {
-
         val ACTION_PAUSE = "action_pause"
-
+        val ACTION_PREVIOUSE = "action_previous"
+        val ACTION_NEXT = "action_next"
+        val ACTION_CLOSE = "action_close"
     }
 
 
