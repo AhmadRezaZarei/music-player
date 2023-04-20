@@ -6,18 +6,22 @@ import android.content.*
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.MediaStore
+import android.util.Log
 import android.view.MenuItem
 import android.widget.MediaController.MediaPlayerControl
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.ray.zarei.audiotrimmer.CheapSoundFile
+import com.ray.zarei.audiotrimmer.CheapSoundFile.ProgressListener
+import com.ray.zarei.audiotrimmer.Util
 import com.ray.zarei.musicplayer.adapters.SongsRecyclerViewAdapter
+import com.ray.zarei.musicplayer.extensions.getInt
 import com.ray.zarei.musicplayer.extensions.getLong
 import com.ray.zarei.musicplayer.extensions.getString
 import com.ray.zarei.musicplayer.extensions.getStringOrNull
-import com.ray.zarei.musicplayer.extensions.getInt
+import com.ray.zarei.musicplayer.utils.AudioUtils
+import java.io.File
 import java.util.*
-
-import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), MediaPlayerControl {
@@ -68,8 +72,9 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
 
         val inputUri = songs[1].data;
-        val outputUri = "/storage/emulated/0/Download/editded.mp3"
-        AudioUtils.clipAudioFile(inputUri, outputUri, 0, 10_000_000)
+        val outputUri = "/storage/emulated/0/Download/editdedddd.mp3"
+
+        AudioUtils.trim(inputUri, outputUri, 0,  10)
 
         setupRecyclerView()
 
