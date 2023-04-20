@@ -1,25 +1,14 @@
 package com.ray.zarei.musicplayer
 
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.*
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.MediaStore
-import android.util.Log
 import android.view.MenuItem
 import android.widget.MediaController.MediaPlayerControl
-import android.widget.RemoteViews
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ray.zarei.musicplayer.adapters.SongsRecyclerViewAdapter
 import com.ray.zarei.musicplayer.extensions.getLong
@@ -76,64 +65,17 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         setContentView(R.layout.activity_main)
 
         getSongs()
+
+
+        val inputUri = songs[1].data;
+        val outputUri = "/storage/emulated/0/Download/editded.mp3"
+        AudioUtils.clipAudioFile(inputUri, outputUri, 0, 10_000_000)
+
         setupRecyclerView()
 
         setController()
 
     }
-
-    val CHANNEL_ID = "channel_id"
-
-    @SuppressLint("RemoteViewLayout")
-    private fun getNotification(): Notification {
-// Get the layouts to use in the custom notification
-        val notificationLayout = RemoteViews(packageName, R.layout.layout_notification)
-        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.layout_notification)
-// Apply the layouts to the notification
-        var customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_background)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomContentView(notificationLayout)
-            .setCustomBigContentView(notificationLayoutExpanded)
-            .build()
-
-        customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle("My notification")
-            .setContentText("Hello World!")
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            // Set the intent that will fire when the user taps the notification
-            .setAutoCancel(true).build()
-
-        customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_background)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomContentView(notificationLayout)
-            .setCustomBigContentView(notificationLayoutExpanded)
-            .build()
-
-        return customNotification
-    }
-
-    fun createNotificationChannel() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            val name = "channel_name"
-            val descriptionText = "description text"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                this.description = descriptionText
-            }
-
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-
-        }
-
-    }
-
 
     private val musicConnection = object : ServiceConnection {
 
@@ -178,7 +120,7 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
     private fun getSongs() {
 
         val musicResolver = contentResolver
-        val musicUri = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val musicUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val cursor = musicResolver.query(musicUri, null, null, null, null)
 
         if (cursor != null && cursor.moveToFirst()) {
@@ -186,7 +128,6 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
             songs = ArrayList()
 
             do {
-
 
                 val id = cursor.getLong(MediaStore.Audio.AudioColumns._ID)
                 val title = cursor.getString(MediaStore.Audio.AudioColumns.TITLE)
