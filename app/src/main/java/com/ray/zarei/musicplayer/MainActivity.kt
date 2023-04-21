@@ -11,20 +11,29 @@ import android.view.MenuItem
 import android.widget.MediaController.MediaPlayerControl
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import com.ray.zarei.audiotrimmer.CheapSoundFile
-import com.ray.zarei.audiotrimmer.CheapSoundFile.ProgressListener
-import com.ray.zarei.audiotrimmer.Util
 import com.ray.zarei.musicplayer.adapters.SongsRecyclerViewAdapter
+import com.ray.zarei.musicplayer.api.MainApiService
 import com.ray.zarei.musicplayer.extensions.getInt
 import com.ray.zarei.musicplayer.extensions.getLong
 import com.ray.zarei.musicplayer.extensions.getString
 import com.ray.zarei.musicplayer.extensions.getStringOrNull
 import com.ray.zarei.musicplayer.utils.AudioUtils
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import java.io.File
 import java.util.*
+import javax.inject.Inject
 
 
 class MainActivity : AppCompatActivity(), MediaPlayerControl {
+
+
+    @Inject
+    lateinit var mainApiService: MainApiService
 
     var songs: ArrayList<Song> = ArrayList()
 
@@ -64,6 +73,7 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
     @SuppressLint("Range")
     override fun onCreate(savedInstanceState: Bundle?) {
+        (applicationContext as AppApplication).appComponent.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -73,11 +83,40 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         val inputUri = songs[1].data;
         val outputUri = "/storage/emulated/0/Download/editdedddd.mp3"
 
-        AudioUtils.trim(inputUri, outputUri, 0,  10)
+        AudioUtils.trim(inputUri, outputUri, 0, 10)
 
         setupRecyclerView()
 
         setController()
+
+        uploadMusic()
+
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun uploadMusic() {
+
+        GlobalScope.launch {
+
+
+            val file = File("/storage/emulated/0/Download/editdedddd.mp3")
+
+            Log.e("MainActivity",  "" + file.length())
+
+            val requestFile = RequestBody.create(
+                MediaType.parse("audio/mpeg"),
+                file
+            )
+
+            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+
+            val response = mainApiService.upload(body)
+
+            Log.e("MainActivity", "uploadMusic: " + response.code() )
+
+        }
+
 
     }
 

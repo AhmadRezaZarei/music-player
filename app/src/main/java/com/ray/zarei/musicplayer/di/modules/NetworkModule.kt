@@ -14,7 +14,7 @@ class NetworkModule {
     @Provides
     fun provideAuthApiService(): MainApiService {
         return Retrofit.Builder()
-            .baseUrl("172.20.176.47:3000/")
+            .baseUrl("http://172.20.176.47:3000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(MainApiService::class.java)
