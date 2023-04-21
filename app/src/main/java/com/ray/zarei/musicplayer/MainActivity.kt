@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
         controller.setMediaPlayer(this);
         controller.setAnchorView(findViewById(R.id.rc));
         controller.isEnabled = true;
-
         controller.setPrevNextListeners({ v -> // next
             playNext()
         }, { v -> // prev
