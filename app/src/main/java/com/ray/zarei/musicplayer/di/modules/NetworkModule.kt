@@ -10,7 +10,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 @Module
 class NetworkModule {
 
-
     @Provides
     fun provideAuthApiService(): MainApiService {
         return Retrofit.Builder()

@@ -30,10 +30,14 @@ import okhttp3.RequestBody
 import java.io.File
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
 
+
+    @Inject
+    lateinit var viewModel: MainViewModel
 
     @Inject
     lateinit var mainApiService: MainApiService
@@ -55,23 +59,32 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        getSongs()
+        viewModel.songsLiveData.observe(this) {
 
-        val inputUri = songs[1].data;
-        val outputUri = "/storage/emulated/0/Download/editdedddd.mp3"
+            setupRecyclerView(it)
 
-        AudioUtils.trim(inputUri, outputUri, 0, 10)
+            this.serviceToken = MusicPlayerRemote.bindToService(this, ArrayList(it), object : ServiceConnection {
+                override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
 
-        setupRecyclerView()
+                }
 
-        this.serviceToken = MusicPlayerRemote.bindToService(this, this.songs, object : ServiceConnection {
-            override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
+                override fun onServiceDisconnected(p0: ComponentName?) {
+                }
+            })
 
-            }
+        }
 
-            override fun onServiceDisconnected(p0: ComponentName?) {
-            }
-        })
+  //      val inputUri = songs[1].data;
+    //    val outputUri = "/storage/emulated/0/Download/editdedddd.mp3"
+
+//        AudioUtils.trim(inputUri, outputUri, 0, 10)
+
+
+
+
+
+
+        viewModel.getAllSongs()
 
     }
 
@@ -100,11 +113,11 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun setupRecyclerView() {
-        songs.sortWith { s1, s2 -> s1.title.compareTo(s2.title) }
+    fun setupRecyclerView(songs: List<Song>) {
+
         val rc = findViewById<RecyclerView>(R.id.rc)
 
-        val adapter = SongsRecyclerViewAdapter(songs) { clickedSongIndex ->
+        val adapter = SongsRecyclerViewAdapter(ArrayList(songs)) { clickedSongIndex ->
 
             openFragment(clickedSongIndex)
 

@@ -14,7 +14,6 @@ import com.ray.zarei.musicplayer.helper.SortOrder
 import com.ray.zarei.musicplayer.utils.VersionUtils
 import java.text.Collator
 
-
 interface SongsRepository {
 
     fun songs(): List<Song>
@@ -34,8 +33,7 @@ interface SongsRepository {
 
 }
 
-class DefaultSongsRepository(private val context: Context) : SongsRepository {
-
+class DefaultSongsRepository( private val context: Context) : SongsRepository {
 
     override fun songs(): List<Song> {
         return sortedSongs(makeSongCursor(null, null))

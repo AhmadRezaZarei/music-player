@@ -2,6 +2,7 @@ package com.ray.zarei.musicplayer.di.modules
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.ray.zarei.musicplayer.MainViewModel
 import dagger.Binds
 import dagger.MapKey
 import dagger.Module
@@ -36,11 +37,11 @@ abstract class ViewModelModule {
 
     @Binds
     abstract fun bindViewModelFactory(factory: ViewModelFactory): ViewModelProvider.Factory
-//
-//    @Binds
-//    @IntoMap
-//    @ViewModelKey(HomeRecipesViewModel::class)
-//    abstract fun bindHomeRecipesViewModel(viewModel: HomeRecipesViewModel): ViewModel
-//
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(MainViewModel::class)
+    abstract fun bindMainViewModel(viewModel: MainViewModel): ViewModel
+
 }
 
