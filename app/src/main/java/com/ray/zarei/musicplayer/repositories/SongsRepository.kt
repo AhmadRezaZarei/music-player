@@ -2,7 +2,6 @@ package com.ray.zarei.musicplayer.repositories
 
 import android.content.Context
 import android.database.Cursor
-import android.os.Environment
 import android.provider.MediaStore
 import com.ray.zarei.musicplayer.Constants
 import com.ray.zarei.musicplayer.Constants.baseProjection
@@ -16,7 +15,7 @@ import com.ray.zarei.musicplayer.utils.VersionUtils
 import java.text.Collator
 
 
-interface SongRepository {
+interface SongsRepository {
 
     fun songs(): List<Song>
 
@@ -35,7 +34,7 @@ interface SongRepository {
 
 }
 
-class DefaultSongRepository(private val context: Context): SongRepository {
+class DefaultSongsRepository(private val context: Context): SongsRepository {
 
 
     override fun songs(): List<Song> {
