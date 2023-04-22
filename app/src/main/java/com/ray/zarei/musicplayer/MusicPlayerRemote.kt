@@ -1,15 +1,11 @@
 package com.ray.zarei.musicplayer
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
 import android.database.Cursor
 import android.net.Uri
 import android.os.IBinder
-import android.provider.DocumentsContract
-import android.widget.Toast
 import androidx.core.content.ContextCompat
-import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.set
@@ -98,6 +94,10 @@ object MusicPlayerRemote  {
 
     fun pauseSong() {
         musicService?.pause()
+    }
+
+    fun togglePlayPauseSong() {
+        musicService?.togglePlayOrPauseSong()
     }
 
     /**

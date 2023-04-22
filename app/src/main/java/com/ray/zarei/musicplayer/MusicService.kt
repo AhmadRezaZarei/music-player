@@ -1,6 +1,5 @@
 package com.ray.zarei.musicplayer
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.ComponentName
@@ -106,7 +105,7 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener,
         }
 
     }
-    fun pauseOrPauseSong() {
+    fun togglePlayOrPauseSong() {
 
         if (player.isPlaying) {
             player.pause()
@@ -281,7 +280,7 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener,
 
                 ACTION_PAUSE -> {
 
-                    pauseOrPauseSong()
+                    togglePlayOrPauseSong()
 
                 }
 

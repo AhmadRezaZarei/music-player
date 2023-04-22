@@ -32,6 +32,10 @@ class PlayingFragment : Fragment() {
             MusicPlayerRemote.playPreviousSong()
         }
 
+        view.findViewById<View>(R.id.btn_play_pause).setOnClickListener {
+            MusicPlayerRemote.togglePlayPauseSong()
+        }
+
         return view
     }
 
