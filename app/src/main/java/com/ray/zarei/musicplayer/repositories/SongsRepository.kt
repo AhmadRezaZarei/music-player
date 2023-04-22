@@ -34,11 +34,11 @@ interface SongsRepository {
 
 }
 
-class DefaultSongsRepository(private val context: Context): SongsRepository {
+class DefaultSongsRepository(private val context: Context) : SongsRepository {
 
 
     override fun songs(): List<Song> {
-        TODO("Not yet implemented")
+        return sortedSongs(makeSongCursor(null, null))
     }
 
     override fun songs(cursor: Cursor?): List<Song> {
@@ -54,7 +54,12 @@ class DefaultSongsRepository(private val context: Context): SongsRepository {
     }
 
     override fun songs(query: String): List<Song> {
-        return songs(makeSongCursor(MediaStore.Audio.AudioColumns.TITLE + " LIKE ?", arrayOf("%$query%")))
+        return songs(
+            makeSongCursor(
+                MediaStore.Audio.AudioColumns.TITLE + " LIKE ?",
+                arrayOf("%$query%")
+            )
+        )
     }
 
     override fun sortedSongs(cursor: Cursor?): List<Song> {
@@ -62,7 +67,7 @@ class DefaultSongsRepository(private val context: Context): SongsRepository {
         val collator = Collator.getInstance()
         val songs = songs(cursor)
 
-        return songs.sortedWith{ s1, s2 -> collator.compare(s1.title, s2.title) }
+        return songs.sortedWith { s1, s2 -> collator.compare(s1.title, s2.title) }
 
     }
 
@@ -116,7 +121,12 @@ class DefaultSongsRepository(private val context: Context): SongsRepository {
     }
 
     override fun song(songId: Long): Song {
-        return song(makeSongCursor(MediaStore.Audio.AudioColumns._ID + "=?", arrayOf(songId.toString())))
+        return song(
+            makeSongCursor(
+                MediaStore.Audio.AudioColumns._ID + "=?",
+                arrayOf(songId.toString())
+            )
+        )
     }
 
     private fun getSongFromCursorImpl(
@@ -151,7 +161,6 @@ class DefaultSongsRepository(private val context: Context): SongsRepository {
             albumArtist ?: ""
         )
     }
-
 
 
 }
