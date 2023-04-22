@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import com.ray.zarei.musicplayer.MusicPlayerRemote
 import com.ray.zarei.musicplayer.R
 
 
@@ -24,14 +25,12 @@ class PlayingFragment : Fragment() {
 
 
         view.findViewById<View>(R.id.btn_next).setOnClickListener {
-
+            MusicPlayerRemote.playNextSong()
         }
 
         view.findViewById<View>(R.id.btn_prev).setOnClickListener {
-
+            MusicPlayerRemote.playPreviousSong()
         }
-
-
 
         return view
     }
