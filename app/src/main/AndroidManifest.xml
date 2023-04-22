@@ -24,8 +24,6 @@
         <activity
             android:name=".NotificationActivity"
             android:exported="true" >
-
-
         </activity>
 
         <service android:name=".MusicService"

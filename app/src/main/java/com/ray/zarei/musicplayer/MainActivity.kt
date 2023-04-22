@@ -48,15 +48,15 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
     var musicBound = false
 
     fun setController() {
-        controller = MusicController(this)
-        controller.setMediaPlayer(this);
-        controller.setAnchorView(findViewById(R.id.rc));
-        controller.isEnabled = true;
-        controller.setPrevNextListeners({ v -> // next
-            playNext()
-        }, { v -> // prev
-            playPrev()
-        })
+//        controller = MusicController(this)
+//        controller.setMediaPlayer(this);
+//        controller.setAnchorView(findViewById(R.id.rc));
+//        controller.isEnabled = true;
+//        controller.setPrevNextListeners({ v -> // next
+//            playNext()
+//        }, { v -> // prev
+//            playPrev()
+//        })
 
     }
 
@@ -79,7 +79,6 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
         getSongs()
 
-
         val inputUri = songs[1].data;
         val outputUri = "/storage/emulated/0/Download/editdedddd.mp3"
 
@@ -89,7 +88,7 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
         setController()
 
-        uploadMusic()
+    //    uploadMusic()
 
     }
 
