@@ -3,11 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:background="@color/md_grey_800">
-
-
+    android:background="@color/white">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/playerMenu"
@@ -131,17 +129,17 @@
         android:background="@drawable/round_selector"
         android:padding="16dp"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="@+id/previousButton"
-        app:layout_constraintEnd_toStartOf="@+id/previousButton"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_prev"
+        app:layout_constraintEnd_toStartOf="@+id/btn_prev"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/previousButton"
+        app:layout_constraintTop_toTopOf="@+id/btn_prev"
         app:srcCompat="@drawable/ic_repeat"
         tools:ignore="MissingPrefix"
         tools:tint="@color/md_black_1000" />
 
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/previousButton"
+        android:id="@+id/btn_prev"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/round_selector"
@@ -165,15 +163,15 @@
         android:background="@drawable/round_selector"
         app:fabCustomSize="64dp"
         app:layout_constraintBottom_toTopOf="@+id/volumeFragmentContainer"
-        app:layout_constraintEnd_toStartOf="@+id/nextButton"
+        app:layout_constraintEnd_toStartOf="@+id/btn_next"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/previousButton"
+        app:layout_constraintStart_toEndOf="@+id/btn_prev"
         app:layout_constraintTop_toBottomOf="@+id/progressSlider"
         app:srcCompat="@drawable/ic_pause_white_64dp"
         tools:tint="@color/md_black_1000" />
 
     <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/nextButton"
+        android:id="@+id/btn_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/round_selector"
@@ -195,11 +193,11 @@
         android:background="@drawable/round_selector"
         android:padding="16dp"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toBottomOf="@+id/nextButton"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_next"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/nextButton"
-        app:layout_constraintTop_toTopOf="@+id/nextButton"
+        app:layout_constraintStart_toEndOf="@+id/btn_next"
+        app:layout_constraintTop_toTopOf="@+id/btn_next"
         app:srcCompat="@drawable/ic_shuffle"
         tools:ignore="MissingPrefix"
         tools:tint="@color/md_black_1000" />

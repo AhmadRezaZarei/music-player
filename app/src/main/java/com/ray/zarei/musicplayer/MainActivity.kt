@@ -4,10 +4,12 @@ package com.ray.zarei.musicplayer
 import android.annotation.SuppressLint
 import android.content.*
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
+import android.widget.MediaController
 import android.widget.MediaController.MediaPlayerControl
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +19,7 @@ import com.ray.zarei.musicplayer.extensions.getInt
 import com.ray.zarei.musicplayer.extensions.getLong
 import com.ray.zarei.musicplayer.extensions.getString
 import com.ray.zarei.musicplayer.extensions.getStringOrNull
+import com.ray.zarei.musicplayer.fragments.PlayingFragment
 import com.ray.zarei.musicplayer.utils.AudioUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -29,7 +32,7 @@ import java.util.*
 import javax.inject.Inject
 
 
-class MainActivity : AppCompatActivity(), MediaPlayerControl {
+class MainActivity : AppCompatActivity() {
 
 
     @Inject
@@ -37,39 +40,14 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
     var songs: ArrayList<Song> = ArrayList()
 
-    lateinit var controller: MusicController
+    lateinit var controller: MediaController
+
+    var serviceToken: MusicPlayerRemote.ServiceToken? = null
 
     var songPosition = 0;
 
-    var musicService: MusicService? = null
-
-    var playIntent: Intent? = null
-
     var musicBound = false
 
-    fun setController() {
-//        controller = MusicController(this)
-//        controller.setMediaPlayer(this);
-//        controller.setAnchorView(findViewById(R.id.rc));
-//        controller.isEnabled = true;
-//        controller.setPrevNextListeners({ v -> // next
-//            playNext()
-//        }, { v -> // prev
-//            playPrev()
-//        })
-
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        if (playIntent == null) {
-            playIntent = Intent(this, MusicService::class.java)
-            bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE)
-            startService(playIntent)
-        }
-
-    }
 
     @SuppressLint("Range")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,9 +64,14 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
         setupRecyclerView()
 
-        setController()
+        this.serviceToken = MusicPlayerRemote.bindToService(this, this.songs, object : ServiceConnection {
+            override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
 
-    //    uploadMusic()
+            }
+
+            override fun onServiceDisconnected(p0: ComponentName?) {
+            }
+        })
 
     }
 
@@ -100,8 +83,6 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
             val file = File("/storage/emulated/0/Download/editdedddd.mp3")
 
-            Log.e("MainActivity",  "" + file.length())
-
             val requestFile = RequestBody.create(
                 MediaType.parse("audio/mpeg"),
                 file
@@ -112,38 +93,12 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
             val response = mainApiService.upload(body)
 
-            Log.e("MainActivity", "uploadMusic: " + response.code() )
 
         }
 
 
     }
 
-    private val musicConnection = object : ServiceConnection {
-
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as MusicService.MusicBinder
-            musicService = binder.getService()
-            musicService?.setList(songs)
-            musicBound = true
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            musicBound = false
-        }
-
-    }
-
-
-    fun playNext() {
-        musicService?.playNext()
-        controller.show(0)
-    }
-
-    fun playPrev() {
-        musicService?.playPrev()
-        controller.show(0)
-    }
 
     fun setupRecyclerView() {
         songs.sortWith { s1, s2 -> s1.title.compareTo(s2.title) }
@@ -151,11 +106,18 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
 
         val adapter = SongsRecyclerViewAdapter(songs) { clickedSongIndex ->
 
-            musicService?.setSong(clickedSongIndex)
-            musicService?.playSong()
+            openFragment(clickedSongIndex)
 
+            MusicPlayerRemote.playSong()
         }
         rc.adapter = adapter
+
+    }
+
+    private fun openFragment(clickedSongIndex: Int) {
+        val fragment = PlayingFragment()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment)
+            .commit();
 
     }
 
@@ -212,90 +174,8 @@ class MainActivity : AppCompatActivity(), MediaPlayerControl {
     }
 
     override fun onDestroy() {
-        stopService(playIntent)
-        musicService = null
         super.onDestroy()
+        MusicPlayerRemote.unbindFromService(serviceToken)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-
-        when (item.itemId) {
-
-
-        }
-
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun start() {
-        musicService?.go()
-    }
-
-    override fun pause() {
-        musicService?.pausePlayer()
-    }
-
-    override fun getDuration(): Int {
-
-
-        musicService?.let {
-
-            if (musicBound && it.isPng()) {
-                return it.getDur()
-            }
-        }
-
-        return 0
-    }
-
-    override fun getCurrentPosition(): Int {
-
-        musicService?.let {
-
-            if (musicBound && it.isPng()) {
-                return it.getPosn()
-            }
-
-        }
-
-        return 0
-
-    }
-
-    override fun seekTo(position: Int) {
-        musicService?.seek(position)
-    }
-
-    override fun isPlaying(): Boolean {
-
-        musicService?.let {
-
-            if (musicBound) {
-                return it.isPng()
-            }
-
-        }
-
-        return false
-    }
-
-    override fun getBufferPercentage(): Int {
-        return 0
-    }
-
-    override fun canPause(): Boolean {
-        return true
-    }
-
-    override fun canSeekBackward(): Boolean {
-        return true
-    }
-
-    override fun canSeekForward(): Boolean {
-        return true
-    }
-
-    override fun getAudioSessionId(): Int {
-        return 0
-    }
 }

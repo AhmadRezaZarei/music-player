@@ -22,7 +22,8 @@ import com.ray.zarei.musicplayer.extensions.getTintedDrawable
 import com.ray.zarei.musicplayer.utils.VersionUtils
 
 
-class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
+class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener,
+    MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener {
 
     private val NOTIFY_ID = 1
 
@@ -34,16 +35,19 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
 
     var songPosition: Int = 0
 
+
     fun setList(songs: ArrayList<Song>) {
         this.songs = songs
     }
+
+
 
 
     fun setSong(songPosition: Int) {
         this.songPosition = songPosition
     }
 
-    inner class MusicBinder: Binder() {
+    inner class MusicBinder : Binder() {
         fun getService() = this@MusicService
     }
 
@@ -70,7 +74,10 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
 
         val currentSongId = song.id
 
-        val trackUri: Uri = ContentUris.withAppendedId(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, currentSongId)
+        val trackUri: Uri = ContentUris.withAppendedId(
+            android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            currentSongId
+        )
 
         try {
             player.setDataSource(applicationContext, trackUri)
@@ -92,6 +99,13 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
         playSong()
     }
 
+    fun pause() {
+
+        if (player.isPlaying) {
+            player.pause()
+        }
+
+    }
     fun pauseOrPauseSong() {
 
         if (player.isPlaying) {
@@ -125,11 +139,18 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
         return false
     }
 
-    override fun onGetRoot(clientPackageName: String, clientId: Int, rootHints: Bundle?): BrowserRoot? {
+    override fun onGetRoot(
+        clientPackageName: String,
+        clientId: Int,
+        rootHints: Bundle?
+    ): BrowserRoot? {
         return null
     }
 
-    override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowser.MediaItem>>) {
+    override fun onLoadChildren(
+        parentId: String,
+        result: Result<MutableList<MediaBrowser.MediaItem>>
+    ) {
 
     }
 
@@ -146,7 +167,8 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
                 this.description = descriptionText
             }
 
-            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
 
         }
@@ -160,7 +182,7 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
         createNotificationChannel()
 
         startForeground(12, getNotification(songs[songPosition]))
-        Log.e("MusicService", "started forground" )
+        Log.e("MusicService", "started forground")
 
     }
 
@@ -194,19 +216,26 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
 
             val tintColor = applicationContext.resources.getColor(R.color.black)
 
-             val smallIcon = applicationContext.getTintedDrawable(R.drawable.ic_notification, tintColor).toBitmap()
-             setImageViewBitmap(R.id.iv_small_icon, smallIcon)
+            val smallIcon =
+                applicationContext.getTintedDrawable(R.drawable.ic_notification, tintColor)
+                    .toBitmap()
+            setImageViewBitmap(R.id.iv_small_icon, smallIcon)
 
-            val prev = applicationContext.getTintedDrawable(R.drawable.ic_skip_previous, tintColor).toBitmap()
+            val prev = applicationContext.getTintedDrawable(R.drawable.ic_skip_previous, tintColor)
+                .toBitmap()
             setImageViewBitmap(R.id.ib_action_prev, prev)
 
-            val pause = applicationContext.getTintedDrawable(R.drawable.ic_pause_white_48dp, tintColor).toBitmap()
+            val pause =
+                applicationContext.getTintedDrawable(R.drawable.ic_pause_white_48dp, tintColor)
+                    .toBitmap()
             setImageViewBitmap(R.id.ib_action_play_pause, pause)
 
-            val next = applicationContext.getTintedDrawable(R.drawable.ic_skip_next, tintColor).toBitmap()
-            setImageViewBitmap(R.id.ib_action_next,next)
+            val next =
+                applicationContext.getTintedDrawable(R.drawable.ic_skip_next, tintColor).toBitmap()
+            setImageViewBitmap(R.id.ib_action_next, next)
 
-            val close = applicationContext.getTintedDrawable(R.drawable.ic_close, tintColor).toBitmap()
+            val close =
+                applicationContext.getTintedDrawable(R.drawable.ic_close, tintColor).toBitmap()
             setImageViewBitmap(R.id.ib_action_quit, close)
 
             setImageViewUri(R.id.iv_song_cover, songs[songPosition].getCoverUri())
@@ -214,28 +243,29 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
 
             val serviceName = ComponentName(applicationContext, MusicService::class.java)
 
-            val pausedPendingIntent = buildPendingIntent(applicationContext, ACTION_PAUSE, serviceName)
+            val pausedPendingIntent =
+                buildPendingIntent(applicationContext, ACTION_PAUSE, serviceName)
             setOnClickPendingIntent(R.id.ib_action_play_pause, pausedPendingIntent)
 
             val nextPendingIndent = buildPendingIntent(applicationContext, ACTION_NEXT, serviceName)
             setOnClickPendingIntent(R.id.ib_action_next, nextPendingIndent)
 
-            val previousPendingIndent = buildPendingIntent(applicationContext, ACTION_PREVIOUSE, serviceName)
+            val previousPendingIndent =
+                buildPendingIntent(applicationContext, ACTION_PREVIOUSE, serviceName)
             setOnClickPendingIntent(R.id.ib_action_prev, previousPendingIndent)
 
-            val closePendingIndex = buildPendingIntent(applicationContext, ACTION_CLOSE, serviceName)
+            val closePendingIndex =
+                buildPendingIntent(applicationContext, ACTION_CLOSE, serviceName)
             setOnClickPendingIntent(R.id.ib_action_quit, closePendingIndex)
 
         }
-
-
 
 
 // Apply the layouts to the notification
         val customNotification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            . setCustomBigContentView(notificationLayout)
+            .setCustomBigContentView(notificationLayout)
             .setOngoing(true)
             .setCustomContentView(notificationLayout)
             .build()
@@ -257,7 +287,7 @@ class MusicService : MediaBrowserService(), MediaPlayer.OnPreparedListener, Medi
 
                 ACTION_NEXT -> {
 
-                    Log.e("MusicService", "onStartCommand: action next called" )
+                    Log.e("MusicService", "onStartCommand: action next called")
                     playNext()
 
                 }

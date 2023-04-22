@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import com.ray.zarei.musicplayer.R
 
 
@@ -17,8 +18,22 @@ class PlayingFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_playing, container, false)
+
+
+        val view = inflater.inflate(R.layout.fragment_playing, container, false)
+
+
+        view.findViewById<View>(R.id.btn_next).setOnClickListener {
+
+        }
+
+        view.findViewById<View>(R.id.btn_prev).setOnClickListener {
+
+        }
+
+
+
+        return view
     }
 
     companion object {
